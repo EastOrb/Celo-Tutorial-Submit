@@ -127,29 +127,56 @@ The `_setTokenURI` is acting as a helper method for setting the token URI, by ad
 
 ```Solidity
 // SPDX-License-Identifier: MIT
-pragma solidity  ^0.8.0
+pragma solidity >=0.8.0 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+/**
+ * @title NFT
+ * @dev ERC721 token contract with additional features.
+ */
 contract NFT is ERC721, Ownable {
-    address public _contractOwner;
     uint256 public tokenCounter;
     
-    mapping(uint => string) public tokenURIMap;
-    mapping(uint => uint) public priceMap;
+    mapping(uint256 => string) public tokenURIMap;
+    mapping(uint256 => uint256) public priceMap;
 
-    event Minted(address indexed minter, uint price, uint nftID, string uri);
-        
-    event PriceUpdate(address indexed owner, uint oldPrice, uint newPrice, uint nftID);
+    /**
+     * @dev Emitted when a new token is minted.
+     * @param minter The address that minted the token.
+     * @param price The price associated with the token.
+     * @param nftID The ID of the minted token.
+     * @param uri The URI associated with the token.
+     */
+    event Minted(address indexed minter, uint256 price, uint256 nftID, string uri);
 
+    /**
+     * @dev Emitted when the price of a token is updated.
+     * @param owner The address of the token owner.
+     * @param oldPrice The old price of the token.
+     * @param newPrice The new price of the token.
+     * @param nftID The ID of the token.
+     */
+    event PriceUpdated(address indexed owner, uint256 oldPrice, uint256 newPrice, uint256 nftID);
+
+    /**
+     * @dev Initializes the contract by setting the token name and symbol.
+     */
     constructor() ERC721("MyNFT", "MNFT") {
-        _contractOwner = msg.sender;
-        tokenCounter = 1;
+        tokenCounter = 0;
     }
 
-    function mint(string memory _uri, address _toAddress, uint _price) public returns (uint){
-        uint _tokenId = tokenCounter;
+    /**
+     * @dev Mints a new token with the given URI and assigns it to the specified address.
+     * @param _uri The URI of the token.
+     * @param _toAddress The address to which the token will be assigned.
+     * @param _price The price associated with the token.
+     * @return The ID of the minted token.
+     */
+    function mint(string memory _uri, address _toAddress, uint256 _price) public returns (uint256) {
+        uint256 _tokenId = tokenCounter;
+
         priceMap[_tokenId] = _price;
 
         _safeMint(_toAddress, _tokenId);
@@ -162,12 +189,17 @@ contract NFT is ERC721, Ownable {
         return _tokenId;
     }
 
+    /**
+     * @dev Sets the URI for a given token ID.
+     * @param _tokenId The ID of the token.
+     * @param _tokenURI The new URI for the token.
+     */
     function _setTokenURI(uint256 _tokenId, string memory _tokenURI) internal virtual {
-        require(_exists(_tokenId),"ERC721Metadata: URI set of nonexistent token"); 
+        require(_exists(_tokenId), "ERC721Metadata: URI set of nonexistent token");
         tokenURIMap[_tokenId] = _tokenURI;
     }
-
 }
+
 ```
 
 ## Step 3: Configure Hardhat
